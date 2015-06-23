@@ -1,8 +1,6 @@
 local moonc = {}
 
--- XXX Uses unstable API of luarocks.fs and luarocks.fetch
-local fs = require("luarocks.fs")
-local fetch = require("luarocks.fetch")
+local lfs = require("lfs")
 local api = require("luarocks.api")
 local to_lua = require("moonscript.base").to_lua
 
@@ -18,6 +16,12 @@ local function compile(from, to)
     fto:close()
 end
 
+local function exists(filename)
+    local attr = lfs.attributes(filename)
+    print(filename, attr)
+    return attr and true or false
+end
+
 local function compile_modules(modules)
     if not modules then
         modules = modules_from_rockspec
@@ -26,9 +30,9 @@ local function compile_modules(modules)
         error("Field 'moonc' missing from rockspec")
     end
     for modname, filename in pairs(modules) do
-        if not fs.exists(filename) and filename:match("%.lua") then
+        if not exists(filename) and filename:match("%.lua") then
             local moon_filename = filename:sub(1, -5)..".moon"
-            if fs.exists(moon_filename) then
+            if exists(moon_filename) then
                 compile(moon_filename, filename)
                 print("moonc: "..moon_filename.." -> "..filename)
             end
@@ -43,7 +47,7 @@ function moonc.load()
 end
 
 function moonc.run(filename)
-    local rockspec, err, errcode = fetch.load_rockspec(filename)
+    local rockspec, err, errcode = api.load_rockspec(filename)
     if err then
         return nil, err, errcode
     end
