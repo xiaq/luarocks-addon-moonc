@@ -9,7 +9,8 @@ description = {
 }
 dependencies = {
     'lua >= 5.1',
-    'LuaFileSystem'
+    'luafilesystem',
+    'moonscript'
 }
 build = {
     type = 'builtin',
